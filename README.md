@@ -27,7 +27,7 @@ Proyek ini dibuat untuk mendemonstrasikan pemahaman mendalam tentang materi inti
 * Java Development Kit (JDK) 8 atau lebih baru.
 * Koneksi Internet (untuk mengambil data API).
 
-Project PBO Kelompok 11
+## Project PBO Kelompok 11
 Angota:
 1. L0124035 - Agischa Nur Aghianingtyas
 2. L0124144 - Wantech Arofiq Huda F.       
