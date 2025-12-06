@@ -36,7 +36,7 @@ public class MyFilmList extends JFrame {
         loadWatchlistData(); 
 
         // Setup Window
-        setTitle("MyMovieLog - Movie Tracker");
+        setTitle("MyFilmList");
         setSize(900, 600); // Ukuran sedikit diperlebar
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
