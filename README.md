@@ -10,7 +10,7 @@ Aplikasi ini dibangun menggunakan **Java Swing** dan terintegrasi dengan **TMDB 
 * **Watchlist:** Menyimpan film yang ingin ditonton ke dalam daftar pribadi.
 * **Persistensi Data:** Data Watchlist tersimpan secara permanen di komputer lokal (tidak hilang saat aplikasi ditutup).
 * **Async Loading:** Proses pengambilan data dan gambar berjalan di latar belakang tanpa membekukan antarmuka (GUI).
-* **Menggunakan API:** Menggunakan API dari [The Movie Database (TMDB)](https://www.themoviedb.org/documentation/api) sebagai sumber database fim.
+* **Menggunakan API:** Menggunakan API dari [The Movie Database (TMDB)](https://www.themoviedb.org/documentation/api) sebagai sumber database film.
 
 ## Konsep Pemrograman yang Diterapkan
 Proyek ini dibuat untuk mendemonstrasikan pemahaman mendalam tentang materi inti Java tanpa ketergantungan pada library pihak ketiga (seperti Gson atau Jackson):
