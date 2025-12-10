@@ -2,6 +2,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ public class HomePage extends JPanel {
     
     private int currentPage = 1;
     private boolean isLoading = false;
-    private String currentMode = "POPULAR"; // "POPULAR", "GENRE", "SEARCH"
+    private String currentMode = "POPULAR"; 
     private int currentGenreId = 0;
     private String currentQuery = "";
     // -----------------------------
@@ -33,7 +34,6 @@ public class HomePage extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(24, 24, 27)); 
 
-        // Init Genre ID
         genres.put("🔥 Popular", 0); 
         genres.put("💥 Action", 28);
         genres.put("😂 Comedy", 35);
@@ -42,12 +42,12 @@ public class HomePage extends JPanel {
         genres.put("🤖 Sci-Fi", 878);
         genres.put("🎨 Animation", 16);
 
-        // -- HEADER WRAPPER --
+        // -- HEADER WRAPPER (Wadah Utama Bagian Atas) --
         JPanel topContainer = new JPanel();
         topContainer.setLayout(new BoxLayout(topContainer, BoxLayout.Y_AXIS));
         topContainer.setBackground(new Color(24, 24, 27));
 
-        // 1. SEARCH BAR AREA
+        // 1. SEARCH BAR
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 20));
         searchPanel.setBackground(new Color(24, 24, 27));
 
@@ -63,7 +63,7 @@ public class HomePage extends JPanel {
         searchPanel.add(navActorsButton); 
         searchPanel.add(navWatchlistButton);
 
-        // 2. CATEGORY BUTTONS AREA
+        // 2. CATEGORY BUTTONS
         categoryPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         categoryPanel.setBackground(new Color(24, 24, 27));
         categoryPanel.setBorder(new EmptyBorder(0, 0, 10, 0)); 
@@ -71,22 +71,18 @@ public class HomePage extends JPanel {
         for (String genreName : genres.keySet()) {
             JButton btn = new CategoryButton(genreName);
             int id = genres.get(genreName);
-            
             btn.addActionListener(e -> {
                 resetCategoryButtons(); 
                 btn.setBackground(new Color(99, 102, 241)); 
-                
                 if (id == 0) titleLabel.setText("What's Popular");
                 else titleLabel.setText("Genre: " + genreName);
-                
                 loadMoviesByGenre(id);
             });
-
             if (id == 0) btn.setBackground(new Color(99, 102, 241));
             categoryPanel.add(btn);
         }
 
-        // 3. TITLE LABEL AREA
+        // 3. TITLE LABEL
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 25, 5));
         titlePanel.setBackground(new Color(24, 24, 27));
         titleLabel = new JLabel("What's Popular");
@@ -94,48 +90,54 @@ public class HomePage extends JPanel {
         titleLabel.setForeground(Color.WHITE);
         titlePanel.add(titleLabel);
 
+        // 4. PAGINATION PANEL (PINDAH KE ATAS SINI!)
+        JPanel paginationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 5)); // Rata Kanan biar rapi
+        paginationPanel.setBackground(new Color(24, 24, 27));
+        paginationPanel.setBorder(new EmptyBorder(0, 0, 10, 25)); // Jarak dikit
+        
+        btnPrev = new UIComponents.ModernButton("<", new Color(39, 39, 42), Color.GRAY); // Tombol kecil aja
+        btnNext = new UIComponents.ModernButton(">", new Color(99, 102, 241), new Color(79, 70, 229));
+        
+        lblPageIndicator = new JLabel("Page 1");
+        lblPageIndicator.setForeground(Color.WHITE);
+        lblPageIndicator.setFont(new Font("SansSerif", Font.BOLD, 14));
+        lblPageIndicator.setBorder(new EmptyBorder(0, 10, 0, 10)); // Jarak teks
+        
+        btnPrev.setPreferredSize(new Dimension(50, 35));
+        btnNext.setPreferredSize(new Dimension(50, 35));
+        
+        btnPrev.addActionListener(e -> changePage(-1)); 
+        btnNext.addActionListener(e -> changePage(1));  
+
+        paginationPanel.add(btnPrev);
+        paginationPanel.add(lblPageIndicator);
+        paginationPanel.add(btnNext);
+
+        // GABUNGKAN SEMUA KE TOP CONTAINER
         topContainer.add(searchPanel);
         topContainer.add(categoryPanel);
-        topContainer.add(titlePanel);
+        // Kita bikin baris baru untuk Judul (Kiri) dan Pagination (Kanan) biar sejajar
+        JPanel titleAndPageContainer = new JPanel(new BorderLayout());
+        titleAndPageContainer.setBackground(new Color(24, 24, 27));
+        titleAndPageContainer.add(titlePanel, BorderLayout.WEST);
+        titleAndPageContainer.add(paginationPanel, BorderLayout.EAST);
+        
+        topContainer.add(titleAndPageContainer);
 
-        // -- GRID --
+        // -- GRID PANEL --
         gridPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 20));
         gridPanel.setBackground(new Color(24, 24, 27));
+        
+        // Padding Bawah Normal saja (tidak perlu tebal-tebal lagi)
+        gridPanel.setBorder(new EmptyBorder(10, 20, 50, 20)); 
         
         scrollPane = new JScrollPane(gridPanel);
         scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-        add(topContainer, BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
-        
-        // -- FOOTER (PAGINATION PANEL) --
-        // UPDATE 1: Ganti warna background footer agar beda dengan grid
-        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
-        footerPanel.setBackground(new Color(39, 39, 42)); // Warna sedikit lebih terang
-        footerPanel.setOpaque(true);
-        // Opsional: Garis pemisah tipis di atas footer
-        footerPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(60, 60, 60)));
-        
-        btnPrev = new UIComponents.ModernButton("< Prev", new Color(24, 24, 27), Color.GRAY);
-        btnNext = new UIComponents.ModernButton("Next >", new Color(99, 102, 241), new Color(79, 70, 229));
-        
-        lblPageIndicator = new JLabel("Page 1");
-        lblPageIndicator.setForeground(Color.WHITE);
-        lblPageIndicator.setFont(new Font("SansSerif", Font.BOLD, 14));
-        
-        btnPrev.setPreferredSize(new Dimension(100, 40));
-        btnNext.setPreferredSize(new Dimension(100, 40));
-        
-        // Logic Tombol Pagination
-        btnPrev.addActionListener(e -> changePage(-1)); 
-        btnNext.addActionListener(e -> changePage(1));  
-
-        footerPanel.add(btnPrev);
-        footerPanel.add(lblPageIndicator);
-        footerPanel.add(btnNext);
-        
-        add(footerPanel, BorderLayout.SOUTH); 
+        add(topContainer, BorderLayout.NORTH); // HEADER DI ATAS
+        add(scrollPane, BorderLayout.CENTER);  // SCROLL DI TENGAH (Penuhi sisa layar)
+        // Bagian SOUTH (Footer) dihapus total karena pagination sudah di atas.
 
         // -- ACTIONS --
         searchField.addActionListener(e -> performSearch());
@@ -147,12 +149,12 @@ public class HomePage extends JPanel {
         updatePaginationButtons(); 
     }
 
+    // --- LOGIC STANDARD (Gak perlu hitung tinggi aneh-aneh lagi) ---
+    
     private void changePage(int increment) {
-        if (isLoading) return; // Cegah double click
-        
+        if (isLoading) return; 
         int nextPage = currentPage + increment;
         if (nextPage < 1) return; 
-        
         currentPage = nextPage;
         loadCurrentPageData(); 
     }
@@ -160,8 +162,6 @@ public class HomePage extends JPanel {
     private void loadCurrentPageData() {
         isLoading = true;
         lblPageIndicator.setText("Loading...");
-        
-        // UPDATE 2: Matikan tombol saat loading
         btnPrev.setEnabled(false);
         btnNext.setEnabled(false);
         
@@ -187,16 +187,13 @@ public class HomePage extends JPanel {
                 SwingUtilities.invokeLater(() -> {
                     if (finalMovies != null && !finalMovies.isEmpty()) {
                         populateGrid(finalMovies);
-                        
-                        // UPDATE 3: Scroll Paksa ke Atas!
-                        scrollPane.getVerticalScrollBar().setValue(0);
-                        
+                        // Reset scroll ke atas saat ganti halaman
+                        if (scrollPane != null) scrollPane.getVerticalScrollBar().setValue(0);
                     } else {
                         gridPanel.add(new JLabel("No more movies."));
                         gridPanel.revalidate();
                         gridPanel.repaint();
                     }
-                    
                     isLoading = false;
                     updatePaginationButtons();
                 });
@@ -212,13 +209,9 @@ public class HomePage extends JPanel {
 
     private void updatePaginationButtons() {
         lblPageIndicator.setText("Page " + currentPage);
-        
         btnPrev.setEnabled(currentPage > 1);
-        
-        // Styling tombol disabled
         if (currentPage == 1) btnPrev.setBackground(Color.DARK_GRAY);
-        else btnPrev.setBackground(new Color(24, 24, 27));
-        
+        else btnPrev.setBackground(new Color(39, 39, 42));
         btnNext.setEnabled(true);
     }
 
@@ -248,7 +241,6 @@ public class HomePage extends JPanel {
         currentPage = 1; 
         if (id == 0) currentMode = "POPULAR";
         else currentMode = "GENRE";
-        
         loadCurrentPageData();
     }
 
@@ -258,32 +250,33 @@ public class HomePage extends JPanel {
 
     private void performSearch() {
         String q = searchField.getText().trim();
-        if(q.isEmpty()) { 
-            resetToHome(); 
-            return; 
-        }
+        if(q.isEmpty()) { resetToHome(); return; }
         
         resetCategoryButtons(); 
         titleLabel.setText("Results for: \"" + q + "\"");
-
         currentMode = "SEARCH";
         currentQuery = q;
         currentPage = 1; 
-
         loadCurrentPageData();
     }
 
     private void populateGrid(List<Movie> movies) {
         gridPanel.removeAll();
-        int rows = (int) Math.ceil(movies.size() / 5.0); 
         
-        // UPDATE 4: Tambah buffer +50px agar baris terakhir tidak ketutupan footer
-        gridPanel.setPreferredSize(new Dimension(1100, (rows * 360) + 50)); 
+        // KEMBALIKAN LOGIKA TINGGI PANEL KE "AUTO" (FLOWLAYOUT STANDARD)
+        // Kita cukup set lebar, tinggi biar ngikutin konten (0)
+        // FlowLayout memang agak tricky di ScrollPane, jadi kita set PreferredSize manual tapi simpel
+        
+        int rows = (int) Math.ceil(movies.size() / 5.0); // Asumsi kasar
+        // Kasih ruang agak banyak (misal 5 kolom jadi 4 baris, tapi kita siapin buat 5 baris biar aman)
+        // Kali ini aman karena di bawah GRID tidak ada footer yang menghalangi!
+        gridPanel.setPreferredSize(new Dimension(1000, rows * 380)); 
         
         for (Movie m : movies) {
             MovieCard card = new MovieCard(m, () -> parentFrame.showDetailPopup(m));
             gridPanel.add(card);
         }
+        
         gridPanel.revalidate();
         gridPanel.repaint();
     }
